@@ -9,25 +9,15 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/', (req, res) => {
-    res.json({ status: 'ok', message: 'Server is running' });
-});
-
-// Proxy endpoint for GetMyBoat API
-app.get('/api/availability', async (req, res) => {
+// Proxy endpoint for GetMyBoat Next.js data
+app.get('/api/listing/:listingId', async (req, res) => {
     try {
-        const { boat_id, start_date, end_date, page_size, guest_count, currency, lang } = req.query;
+        const { listingId } = req.params;
+        const buildId = 'B6JpKIBJAaLf6nY6CkDFy'; // This might need to be updated periodically
         
-        const response = await axios.get('https://www.getmyboat.com/api/v4/instabook/availability/', {
+        const response = await axios.get(`https://www.getmyboat.com/_next/data/${buildId}/en/trips/${listingId}.json`, {
             params: {
-                boat_id,
-                start_date,
-                end_date,
-                page_size: page_size || 25,
-                guest_count: guest_count || 2,
-                currency: currency || 'USD',
-                lang: lang || 'en'
+                listing_id: listingId
             }
         });
         
@@ -37,8 +27,6 @@ app.get('/api/availability', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch data from GetMyBoat API', details: error.message });
     }
 });
-
-app.use(express.static('public'));
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
