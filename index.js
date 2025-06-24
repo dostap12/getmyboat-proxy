@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Base URL for GetMyBoat API
 const GETMYBOAT_API_BASE = 'https://www.getmyboat.com';
-const NEXT_BUILD_ID = 'B6JpKIBJAaLf6nY6CkDFy';
+const NEXT_BUILD_ID = 'eFjvBGKQex-3JCkDLgWfs';
 
 // Listing Information
 app.get('/api/listing/:listingId', async (req, res) => {
