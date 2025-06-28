@@ -145,6 +145,76 @@ app.get('/api/listing/:listingId/calculate-price', async (req, res) => {
     }
 });
 
+// Extract place ID from URL and search GetMyBoat
+app.get('/api/search-by-url', async (req, res) => {
+    try {
+        const { url } = req.query;
+        
+        if (!url) {
+            return res.status(400).json({ error: 'URL parameter is required' });
+        }
+
+        // Extract place_id from URL
+        const urlObj = new URL(url);
+        const placeId = urlObj.searchParams.get('place_id');
+        
+        if (!placeId) {
+            return res.status(400).json({ error: 'No place_id found in URL' });
+        }
+
+        // Make API call to GetMyBoat with the place_id
+        const response = await axios.get(`${GETMYBOAT_API_BASE}/_next/data/${NEXT_BUILD_ID}/en/boat-rental.json`, {
+            params: {
+                filters: '',
+                page: 1,
+                place_id: placeId,
+                page_size: 40,
+                instabooks: true,
+                lang: 'en'
+            }
+        });
+
+        res.json({
+            placeId: placeId,
+            searchResults: response.data
+        });
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({ error: 'Failed to search by URL', details: error.message });
+    }
+});
+
+// Direct place ID search
+app.get('/api/search-by-place-id', async (req, res) => {
+    try {
+        const { placeId, page = 1 } = req.query;
+        
+        if (!placeId) {
+            return res.status(400).json({ error: 'placeId parameter is required' });
+        }
+
+        // Make API call to GetMyBoat with the place_id
+        const response = await axios.get(`${GETMYBOAT_API_BASE}/_next/data/${NEXT_BUILD_ID}/en/boat-rental.json`, {
+            params: {
+                filters: '',
+                page: page,
+                place_id: placeId,
+                page_size: 40,
+                instabooks: true,
+                lang: 'en'
+            }
+        });
+
+        res.json({
+            placeId: placeId,
+            searchResults: response.data
+        });
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({ error: 'Failed to search by place ID', details: error.message });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
